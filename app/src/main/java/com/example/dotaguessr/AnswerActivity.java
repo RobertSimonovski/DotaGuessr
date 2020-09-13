@@ -10,6 +10,8 @@ import com.squareup.picasso.Picasso;
 
 public class AnswerActivity extends AppCompatActivity {
 
+    private boolean answered = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,11 +31,14 @@ public class AnswerActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if(answered)
+            PlayerRow.revealAnswers();
         super.onBackPressed();
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     public void yesBtn(View view){
+        answered = true;
         findViewById(R.id.areYouSureTextView).setVisibility(View.GONE);
         findViewById(R.id.buttonYes).setVisibility(View.GONE);
         findViewById(R.id.buttonNo).setVisibility(View.GONE);
@@ -63,7 +68,6 @@ public class AnswerActivity extends AppCompatActivity {
     }
 
     public void backBtn(View view){
-        PlayerRow.revealAnswers();
         onBackPressed();
     }
 
