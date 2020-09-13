@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="blueGreenBackground">#033333</color>
+    <color name="whiteTransparent">#33ffffff</color>
+    <color name="darkWhiteTransparent">#10ffffff</color>
+    <color name="radiantGreen">#92a525</color>
+    <color name="direRed">#c03c2a</color>
+    <color name="radiantHeroBackground1">#1a92a525</color>
+    <color name="radiantHeroBackground2">#2692a525</color>
+    <color name="direHeroBackground1">#1ac03c2a</color>
+    <color name="direHeroBackground2">#26c03c2a</color>
+    <color name="text_shadow">#7F000000</color>
+    <color name="text_shadow_white">#FFFFFF</color>
+    <color name="goldOrange">#FFBB33</color>
+</resources>
