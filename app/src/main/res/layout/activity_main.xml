@@ -7,6 +7,24 @@
         android:layout_height="match_parent"
         android:background="@color/blueGreenBackground"
         tools:context=".MainActivity">
+    <androidx.appcompat.widget.Toolbar
+            android:id="@+id/my_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/darkWhiteTransparent"
+            android:elevation="4dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+                <TextView android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:textStyle="bold"
+                          android:textColor="@android:color/white"
+                          android:text="Tobi"
+                          android:textSize="20sp"
+                />
+    </androidx.appcompat.widget.Toolbar>
     <Button
             android:text="Play"
             android:layout_width="300dp"

@@ -5,8 +5,10 @@ import android.content.res.Resources;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import androidx.appcompat.widget.Toolbar;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,6 +21,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayShowTitleEnabled(false);
         try {
             Item.setItems(getResources().openRawResource(R.raw.items));
             Hero.setHeroes(getResources().openRawResource(R.raw.heroes));

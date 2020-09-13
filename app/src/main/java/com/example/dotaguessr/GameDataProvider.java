@@ -1,4 +1,6 @@
 package com.example.dotaguessr;
 
-public class GameDataProvider {
+import androidx.lifecycle.ViewModel;
+
+public class GameDataProvider extends ViewModel {
 }
