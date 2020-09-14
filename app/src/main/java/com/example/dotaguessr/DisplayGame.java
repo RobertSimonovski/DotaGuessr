@@ -1,17 +1,22 @@
 package com.example.dotaguessr;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.os.Bundle;
 import androidx.fragment.app.*;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import com.google.android.material.tabs.TabLayout;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -26,14 +31,14 @@ public class DisplayGame extends FragmentActivity {
     public final Object lock = new Object();
     TabLayout tabLayout;
     private long playerID;
+    private MatchHistoryViewModel matchHistory;
 
     public Game getGame() { return game; }
+    @SuppressLint("StaticFieldLeak")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_game);
-
-        getMatchHistory();
 
         tabLayout = findViewById(R.id.tabLayout);
 
@@ -94,7 +99,29 @@ public class DisplayGame extends FragmentActivity {
             }
         });
 
+        matchHistory = ViewModelProviders.of(this).get(MatchHistoryViewModel.class);
+        if(!matchHistory.setMatchHistory(getIntent().getLongExtra("playerID", -1))){
+            failedCallMessage();
+            onBackPressed();
+        }
+        new AsyncTask<Void, Void, Long>() {
+            @Override
+            protected Long doInBackground(Void... voids) {
+                try{
+                    synchronized (matchHistory.getLock()){
+                        while(matchHistory.getMatchHistory() == null)
+                            matchHistory.getLock().wait();
+                    }
+                } catch (InterruptedException e) { e.printStackTrace(); }
 
+                return matchHistory.getRandomMatch();
+            }
+
+            @Override
+            protected void onPostExecute(Long aLong) {
+                getGameData(aLong);
+            }
+        }.execute();
     }
     private void replaceFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -109,52 +136,9 @@ public class DisplayGame extends FragmentActivity {
         dialog.show(getSupportFragmentManager(),"failed call");
     }
 
-    private void getMatchHistory(){
-        Intent intent = getIntent();
-        playerID = intent.getLongExtra("playerID", -3);
-
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .addInterceptor(loggingInterceptor)
-                .build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.steampowered.com/IDOTA2Match_570/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(okHttpClient)
-                .build();
-        SteamWebApi steamWebApi = retrofit.create(SteamWebApi.class);
-
-        Call<MatchHistory> call = steamWebApi.GetMatchHistory(getString(R.string.SteamWebAPIKey), playerID);
-
-        call.enqueue(new Callback<MatchHistory>() {
-            @Override
-            public void onResponse(Call<MatchHistory> call, Response<MatchHistory> response) {
-                if(!response.isSuccessful()){
-                    failedCallMessage();
-                    return;
-                }
-                MatchHistory matchHistory = response.body();
-                if(matchHistory.getResultMatchHistory().getStatus() != 1){
-                    failedCallMessage();
-                    return;
-                }
-                getGameData(matchHistory.getResultMatchHistory().getRandomMatch());
-            }
-
-            @Override
-            public void onFailure(Call<MatchHistory> call, Throwable t) {
-                failedCallMessage();
-            }
-        });
-    }
-
     private void getGameData(long matchID){
-        Intent intent = getIntent();
+        //Intent intent = getIntent();
         //String matchID = intent.getStringExtra("matchID");
-        matchID = 5611693516L;
 
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -224,6 +208,7 @@ public class DisplayGame extends FragmentActivity {
             }
         });
     }
+
     private String formatTime(long totalSeconds){
         int hours = 0, minutes = 0, seconds = 0;
         StringBuilder duration = new StringBuilder("");
