@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements AsyncResponse{
 //                        .get(MatchHistoryViewModel.class);
     }
     public void play(View view){
-        if(matchHistoryViewModel == null || matchHistoryViewModel.getPlayerID() != playerID){
+        if((matchHistoryViewModel == null || matchHistoryViewModel.getPlayerID() != playerID) && (playerID != matchHistoryRepository.getPlayerID() || playerID == -1)){
             this.getViewModelStore().clear();
             matchHistoryViewModel =
                     new ViewModelProvider(this, new MatchHistoryViewModelFactory(this.getApplication(), playerID))

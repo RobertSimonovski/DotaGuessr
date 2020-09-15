@@ -27,12 +27,13 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class DisplayGame extends FragmentActivity {
+public class DisplayGame extends FragmentActivity implements AsyncResponseGame{
     private Game game;
     public final Object lock = new Object();
     TabLayout tabLayout;
     private long playerID;
     private MatchHistoryViewModel matchHistory;
+    GameDataProvider gameDataProvider;
 
     public Game getGame() { return game; }
     @SuppressLint("StaticFieldLeak")
@@ -65,43 +66,13 @@ public class DisplayGame extends FragmentActivity {
 //
 //            }
 //        });
-
-        final LinearLayout fragmentContainer = findViewById(R.id.fragment_container);
-        if (fragmentContainer.getChildCount() == 0)
-            replaceFragment(new OverviewTableFragment());
-
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                switch (tab.getPosition()){
-                    case 0:
-                        replaceFragment(new OverviewTableFragment());
-                        break;
-                    case 1:
-                        replaceFragment(new FarmTableFragment());
-                        break;
-                    case 2:
-                        replaceFragment(new ItemsTableFragment());
-                        break;
-//                    case 3:
-//                        replaceFragment(new DamageTableFragment());
-//                        break;
-                }
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
-
-        getGameData(getIntent().getLongExtra("matchID", -1));
-
+        gameDataProvider = new ViewModelProvider(this, new GameDataProviderFactory(this.getApplication(), MatchHistoryRepository.getInstance().getRandomID()))
+                .get(GameDataProvider.class);
+        GameDataProvider.GetGameData getGameData = new GameDataProvider.GetGameData(gameDataProvider);
+        getGameData.delegate = this;
+        getGameData.execute();
+//      getGameData(getIntent().getLongExtra("matchID", -1));
+//
 //        Intent intent = getIntent();
 //        playerID = intent.getLongExtra("playerID", -1);
 //
@@ -139,80 +110,73 @@ public class DisplayGame extends FragmentActivity {
         dialog.show(getSupportFragmentManager(),"failed call");
     }
 
-    private void getGameData(long matchID){
-        //Intent intent = getIntent();
-        //String matchID = intent.getStringExtra("matchID");
-        if(matchID == -1){
-            Log.e("TAG", "getGameData: Invalid matchID" );
+    @Override
+    public void processFinish(Game output) {
+        game = output;
+        ResultGame result = game.getResult();
+
+        TextView view;
+
+        view = findViewById(R.id.winner);
+        if(result.getRadiantWin()){
+            view.setText(R.string.RadiantWin);
+            view.setTextColor(getResources().getColor(R.color.radiantGreen));
+        }
+        else{
+            view.setText(R.string.DireWin);
+            view.setTextColor(getResources().getColor(R.color.direRed));
         }
 
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        view = findViewById(R.id.direKills);
+        view.setText(Integer.toString(result.getDireKills()));
 
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .addInterceptor(loggingInterceptor)
-                .build();
+        view = findViewById(R.id.radiantKills);
+        view.setText(Integer.toString(result.getRadiantKills()));
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.steampowered.com/IDOTA2Match_570/")
-                .addConverterFactory(GsonConverterFactory.create())
-                //.client(okHttpClient)
-                .build();
-        SteamWebApi steamWebApi = retrofit.create(SteamWebApi.class);
+        view = findViewById(R.id.matchDuration);
+        view.setText(formatTime(result.getDuration()));
 
-        Call<Game> call = steamWebApi.GetMatchDetails(getString(R.string.SteamWebAPIKey), matchID, 1);
-        call.enqueue(new Callback<Game>() {
+        view = findViewById(R.id.tvGameMode);
+        view.setText(result.getGameMode());
+
+        view = findViewById(R.id.tvRegion);
+        view.setText(result.getRegion());
+
+        final LinearLayout fragmentContainer = findViewById(R.id.fragment_container);
+        if (fragmentContainer.getChildCount() == 0)
+            replaceFragment(new OverviewTableFragment());
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
-            public void onResponse(Call<Game> call, Response<Game> response) {
-                if(!response.isSuccessful()){
-                    failedCallMessage();
-                    return;
+            public void onTabSelected(TabLayout.Tab tab) {
+                switch (tab.getPosition()){
+                    case 0:
+                        replaceFragment(new OverviewTableFragment());
+                        break;
+                    case 1:
+                        replaceFragment(new FarmTableFragment());
+                        break;
+                    case 2:
+                        replaceFragment(new ItemsTableFragment());
+                        break;
+//                    case 3:
+//                        replaceFragment(new DamageTableFragment());
+//                        break;
                 }
-                synchronized (lock) {
-                    game = response.body();
-                    lock.notifyAll();
-                }
+            }
 
-                assert game != null;
-                ResultGame result = game.getResult();
-
-                TextView view;
-
-                view = findViewById(R.id.winner);
-                if(result.getRadiantWin()){
-                    view.setText(R.string.RadiantWin);
-                    view.setTextColor(getResources().getColor(R.color.radiantGreen));
-                }
-                else{
-                    view.setText(R.string.DireWin);
-                    view.setTextColor(getResources().getColor(R.color.direRed));
-                }
-
-                view = findViewById(R.id.direKills);
-                view.setText(Integer.toString(result.getDireKills()));
-
-                view = findViewById(R.id.radiantKills);
-                view.setText(Integer.toString(result.getRadiantKills()));
-
-                view = findViewById(R.id.matchDuration);
-                view.setText(formatTime(result.getDuration()));
-
-                view = findViewById(R.id.tvGameMode);
-                view.setText(result.getGameMode());
-
-                view = findViewById(R.id.tvRegion);
-                view.setText(result.getRegion());
-
-                drawMap();
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
 
             }
 
             @Override
-            public void onFailure(Call<Game> call, Throwable t) {
-                Log.d("DisplayGame", "Entering onFailure(): Message: " + t.getLocalizedMessage());
-                failedCallMessage();
+            public void onTabReselected(TabLayout.Tab tab) {
+
             }
         });
+
+        drawMap();
     }
 
     private String formatTime(long totalSeconds){
@@ -341,5 +305,8 @@ public class DisplayGame extends FragmentActivity {
     public void onBackPressed() {
         super.onBackPressed();
         PlayerRow.hideAnswers();
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 }

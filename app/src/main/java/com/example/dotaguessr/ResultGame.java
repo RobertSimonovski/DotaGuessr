@@ -105,6 +105,9 @@ public class ResultGame {
             case 18:
                 return "Ability Draft";
 
+            case 19:
+                return "Event game";
+
             case 20:
                 return "All Random Deathmatch";
 
@@ -201,6 +204,20 @@ public class ResultGame {
                 return "Unknown";
         }
 
+    }
+
+    @Override
+    public String toString() {
+        return "ResultGame{" +
+                "radiantWin=" + radiantWin +
+                ", duration=" + duration +
+                ", matchId=" + matchId +
+                ", lobbyType=" + lobbyType +
+                ", gameMode=" + gameMode +
+                ", direKills=" + direKills +
+                ", radiantKills=" + radiantKills +
+                ", cluster=" + cluster +
+                '}';
     }
 }
 

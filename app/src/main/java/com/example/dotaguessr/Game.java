@@ -9,4 +9,11 @@ public class Game {
     private ResultGame result;
 
     public ResultGame getResult()   {  return result;  }
+
+    @Override
+    public String toString() {
+        return "Game{" +
+                "result=" + result.toString() +
+                '}';
+    }
 }
