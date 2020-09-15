@@ -63,12 +63,21 @@ public class ItemsTableFragment extends Fragment {
             if(isAdded()) {
                 game = receivedGame.getResult();
                 Player[] players = game.getPlayers();
+
+                int direPlayers = 0, radiantPlayers = 0;
+                for (Player p : players){
+                    if(p.getPlayerSlot() < 100)
+                        radiantPlayers++;
+                    else
+                        direPlayers++;
+                }
+
                 TableLayout tableLayout = activity.findViewById(R.id.radiantTable);
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < radiantPlayers; i++) {
                     tableLayout.addView(generateRow(players[i]));
                 }
                 tableLayout = activity.findViewById(R.id.direTable);
-                for (int i = 5; i < 10; i++) {
+                for (int i = radiantPlayers; i < radiantPlayers + direPlayers; i++) {
                     tableLayout.addView(generateRow(players[i]));
                 }
             }

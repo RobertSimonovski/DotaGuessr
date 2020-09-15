@@ -144,19 +144,14 @@ public class MatchHistoryViewModel extends AndroidViewModel {
         }
         @Override
         protected Long doInBackground(Void... voids) {
-            Log.d(TAG, "getRandomMatch: START");
             Object lock = matchHistoryViewModel.getLock();
             try {
                 synchronized (matchHistoryViewModel.getLock()) {
-                    Log.d(TAG, "getRandomMatch: synchronized");
                     while (matchHistoryViewModel.getMatchHistory() == null) {
-                        Log.d(TAG, "getRandomMatch: waiting");
                         matchHistoryViewModel.getLock().wait();
                     }
-                    Log.d(TAG, "getRandomMatch: finished waiting");
                 }
             } catch (InterruptedException e) { e.printStackTrace(); }
-            Log.d(TAG, "getRandomMatch: finished trying");
 
             if(matchHistoryViewModel.getSuccess() == 0)
                 return matchHistoryViewModel.getMatchHistory().getRandomMatch();
