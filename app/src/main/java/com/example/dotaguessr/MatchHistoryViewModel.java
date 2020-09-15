@@ -3,6 +3,7 @@ package com.example.dotaguessr;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.os.AsyncTask;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import com.google.gson.annotations.SerializedName;
@@ -18,11 +19,13 @@ import java.util.Random;
 public class MatchHistoryViewModel extends AndroidViewModel {
 
     private final Object lock = new Object();
-
     private MatchHistory matchHistory;
+    private static final String TAG = "MatchHistoryViewModel";
+    private long playerID;
 
-    public MatchHistoryViewModel(@NonNull Application application) {
+    public MatchHistoryViewModel(@NonNull Application application, long playerID) {
         super(application);
+        this.playerID = playerID;
     }
 
     static class MatchHistory{
@@ -64,7 +67,7 @@ public class MatchHistoryViewModel extends AndroidViewModel {
         }
     }
 
-    public boolean setMatchHistory(long playerID){
+    public boolean setMatchHistory(){
         final boolean[] success = {true};
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -76,7 +79,7 @@ public class MatchHistoryViewModel extends AndroidViewModel {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.steampowered.com/IDOTA2Match_570/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .client(okHttpClient)
+//                .client(okHttpClient)
                 .build();
         SteamWebApi steamWebApi = retrofit.create(SteamWebApi.class);
 
@@ -89,10 +92,13 @@ public class MatchHistoryViewModel extends AndroidViewModel {
                     success[0] = false;
                     return;
                 }
+                Log.d(TAG, "onResponse: locking");
                 synchronized (lock){
                     matchHistory = response.body();
+                    Log.d(TAG, "onResponse: set");
                     lock.notifyAll();
                 }
+                Log.d(TAG, "onResponse: unlocking");
                 assert matchHistory != null;
                 if(matchHistory.getResultMatchHistory().getStatus() != 1){
                     success[0] = false;
@@ -107,8 +113,32 @@ public class MatchHistoryViewModel extends AndroidViewModel {
     }
 
     public long getRandomMatch(){
-        return matchHistory.getRandomMatch();
+        if(matchHistory == null)
+            setMatchHistory();
+        new WaitMatchHistory().execute();
+        return 0;
     }
+
+    private class WaitMatchHistory extends AsyncTask<Void, Long, Long>{
+
+        @Override
+        protected Long doInBackground(Void... voids) {
+            Log.d(TAG, "getRandomMatch: START");
+            try {
+                synchronized (lock) {
+                    Log.d(TAG, "getRandomMatch: synchronized");
+                    while (matchHistory == null) {
+                        Log.d(TAG, "getRandomMatch: waiting");
+                        lock.wait();
+                    }
+                    Log.d(TAG, "getRandomMatch: finished waiting");
+                }
+            } catch (InterruptedException e) { e.printStackTrace(); }
+            Log.d(TAG, "getRandomMatch: finished trying");
+            return matchHistory.getRandomMatch();
+        }
+    }
+
     public MatchHistory getMatchHistory(){ return matchHistory; }
     public Object getLock(){ return lock; }
 }

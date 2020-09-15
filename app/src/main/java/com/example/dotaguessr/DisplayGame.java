@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.os.Bundle;
 import androidx.fragment.app.*;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
@@ -99,29 +100,29 @@ public class DisplayGame extends FragmentActivity {
             }
         });
 
-        matchHistory = ViewModelProviders.of(this).get(MatchHistoryViewModel.class);
-        if(!matchHistory.setMatchHistory(getIntent().getLongExtra("playerID", -1))){
-            failedCallMessage();
-            onBackPressed();
-        }
-        new AsyncTask<Void, Void, Long>() {
-            @Override
-            protected Long doInBackground(Void... voids) {
-                try{
-                    synchronized (matchHistory.getLock()){
-                        while(matchHistory.getMatchHistory() == null)
-                            matchHistory.getLock().wait();
-                    }
-                } catch (InterruptedException e) { e.printStackTrace(); }
+        Intent intent = getIntent();
+        playerID = intent.getLongExtra("playerID", -1);
 
-                return matchHistory.getRandomMatch();
-            }
-
-            @Override
-            protected void onPostExecute(Long aLong) {
-                getGameData(aLong);
-            }
-        }.execute();
+        //matchHistory = ViewModelProviders.of(this, new ViewModelProvider.AndroidViewModelFactory(getApplication(), playerID));//.get(MatchHistoryViewModel.class);
+        //matchHistory.getRandomMatch();
+//        new AsyncTask<Void, Void, Long>() {
+//            @Override
+//            protected Long doInBackground(Void... voids) {
+//                try{
+//                    synchronized (matchHistory.getLock()){
+//                        while(matchHistory.getMatchHistory() == null)
+//                            matchHistory.getLock().wait();
+//                    }
+//                } catch (InterruptedException e) { e.printStackTrace(); }
+//
+//                return matchHistory.getRandomMatch();
+//            }
+//
+//            @Override
+//            protected void onPostExecute(Long aLong) {
+//                getGameData(aLong);
+//            }
+//        }.execute();
     }
     private void replaceFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();

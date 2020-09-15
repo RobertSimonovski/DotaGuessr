@@ -7,45 +7,75 @@
         android:layout_height="match_parent"
         android:background="@color/blueGreenBackground"
         tools:context=".MainActivity">
-    <androidx.appcompat.widget.Toolbar
-            android:id="@+id/my_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/darkWhiteTransparent"
-            android:elevation="4dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
-                <TextView android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:textStyle="bold"
-                          android:textColor="@android:color/white"
-                          android:text="Tobi"
-                          android:textSize="20sp"
-                />
-    </androidx.appcompat.widget.Toolbar>
-    <Button
-            android:text="Play"
-            android:layout_width="300dp"
-            android:layout_height="110dp"
-            android:id="@+id/button" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
-            app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
-            android:layout_marginBottom="140dp" app:layout_constraintBottom_toBottomOf="parent"
-            android:onClick="play" style="?android:attr/buttonStyle"/>
-    <EditText
-            android:layout_width="300dp"
-            android:layout_height="110dp"
-            android:inputType="number"
-            android:ems="10"
-            android:hint="Enter MatchID"
-            android:textColorHint="@android:color/white"
+    <TextView
+            android:text="@string/no_connected_id"
+            android:layout_width="wrap_content"
+            android:textSize="38sp"
             android:textColor="@android:color/white"
-            android:background="@color/whiteTransparent"
-            android:gravity="center"
-            android:id="@+id/enterMatchId" app:layout_constraintEnd_toEndOf="@+id/button"
-            android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="@+id/button"
-            android:layout_marginBottom="60dp"
-            app:layout_constraintBottom_toTopOf="@+id/button" app:layout_constraintHorizontal_bias="0.125"
-            />
+            android:textStyle="bold"
+            android:layout_height="wrap_content" android:id="@+id/connectedTextView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.496" android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp" android:layout_marginEnd="16dp"/>
+    <Button
+            android:text="@string/enter_id"
+            android:layout_width="160dp"
+            android:background="@drawable/button_border"
+            android:layout_height="92dp" android:id="@+id/enterIDButton"
+            android:textColor="@android:color/white"
+            android:onClick="enterID"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintHorizontal_bias="0.498" app:layout_constraintTop_toBottomOf="@+id/friendIDTV"
+            android:layout_marginTop="32dp"/>
+    <Button
+            android:text="@string/play"
+            android:layout_width="205dp"
+            android:background="@drawable/button_border"
+            android:layout_height="99dp" android:id="@+id/playButton"
+            android:textColor="@android:color/white"
+            android:textSize="32sp"
+            android:onClick="play"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="16dp"
+            android:layout_marginTop="16dp" app:layout_constraintTop_toBottomOf="@+id/enterIDButton"
+            app:layout_constraintVertical_bias="0.56"/>
+<!--    <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content" android:id="@+id/usernameTV"-->
+<!--            android:textSize="20sp"-->
+<!--            android:textColor="@android:color/white"-->
+<!--            app:layout_constraintStart_toEndOf="@+id/usernameTextView"-->
+<!--            app:layout_constraintTop_toTopOf="@+id/usernameTextView"-->
+<!--            app:layout_constraintBottom_toBottomOf="@+id/usernameTextView" android:layout_marginStart="20dp"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            android:layout_marginEnd="16dp" app:layout_constraintHorizontal_bias="0.0"/>-->
+<!--    <TextView-->
+<!--            android:text="@string/username"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:textSize="22sp"-->
+<!--            android:textStyle="bold"-->
+<!--            android:textColor="@android:color/white"-->
+<!--            android:layout_height="wrap_content" android:id="@+id/usernameTextView"-->
+<!--            app:layout_constraintStart_toStartOf="@+id/connectedTextView" app:layout_constraintTop_toBottomOf="@+id/connectedTextView"-->
+<!--            android:layout_marginTop="16dp"/>-->
+<!--    <TextView-->
+<!--            android:text="@string/dota_friend_id"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:textSize="22sp"-->
+<!--            android:textStyle="bold"-->
+<!--            android:textColor="@android:color/white"-->
+<!--            android:layout_height="wrap_content" android:id="@+id/friendIDTextView"-->
+<!--            app:layout_constraintStart_toStartOf="@+id/connectedTextView"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/connectedTextView" android:layout_marginTop="16dp"/>-->
+    <TextView
+            android:layout_width="wrap_content"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:layout_height="wrap_content" android:id="@+id/friendIDTV"
+            app:layout_constraintEnd_toEndOf="@+id/connectedTextView"
+            app:layout_constraintTop_toBottomOf="@+id/connectedTextView" android:layout_marginTop="16dp"
+            app:layout_constraintStart_toStartOf="@+id/connectedTextView"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

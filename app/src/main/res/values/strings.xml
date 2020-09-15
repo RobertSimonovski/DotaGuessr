@@ -35,4 +35,9 @@
     <string name="quit">Quit</string>
     <string name="back">Back</string>
     <string name="next">Next</string>
+    <string name="enter_id">Enter ID</string>
+    <string name="username">Username:</string>
+    <string name="dota_friend_id">Dota friend ID</string>
+    <string name="no_connected_id">No saved ID</string>
+    <string name="play">Play</string>
 </resources>
