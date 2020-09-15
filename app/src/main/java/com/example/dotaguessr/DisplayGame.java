@@ -100,6 +100,8 @@ public class DisplayGame extends FragmentActivity {
             }
         });
 
+        getGameData(getIntent().getLongExtra("matchID", -1));
+
 //        Intent intent = getIntent();
 //        playerID = intent.getLongExtra("playerID", -1);
 //
@@ -140,6 +142,9 @@ public class DisplayGame extends FragmentActivity {
     private void getGameData(long matchID){
         //Intent intent = getIntent();
         //String matchID = intent.getStringExtra("matchID");
+        if(matchID == -1){
+            Log.e("TAG", "getGameData: Invalid matchID" );
+        }
 
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);

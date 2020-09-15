@@ -4,27 +4,24 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AsyncResponse{
     private SharedPreferences sharedPreferences;
     private long playerID;
+    MatchHistoryViewModel matchHistoryViewModel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,17 +36,26 @@ public class MainActivity extends AppCompatActivity {
         playerID = sharedPreferences.getLong("playerID", -1);
         setViews();
 
-        MatchHistoryViewModel myViewModel =
+        matchHistoryViewModel =
                 new ViewModelProvider(this, new MatchHistoryViewModelFactory(this.getApplication(), playerID))
                         .get(MatchHistoryViewModel.class);
     }
     public void play(View view){
         if(playerID != -1){
-            Intent intent = new Intent(this, DisplayGame.class);
-            intent.putExtra("playerID", playerID);
-            startActivity(intent);
+            MatchHistoryViewModel.WaitMatchHistory waitMatchHistory = new MatchHistoryViewModel.WaitMatchHistory(matchHistoryViewModel);
+            waitMatchHistory.delegate = this;
+            waitMatchHistory.execute();
         }
     }
+
+    @Override
+    public void processFinish(long output) {
+        Intent intent = new Intent(this, DisplayGame.class);
+        intent.putExtra("playerID", playerID);
+        intent.putExtra("matchID", output);
+        startActivity(intent);
+    }
+
     public void enterID(View view){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter Dota friend ID (Not Steam ID!)");

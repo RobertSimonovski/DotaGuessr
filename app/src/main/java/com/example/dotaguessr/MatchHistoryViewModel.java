@@ -125,30 +125,42 @@ public class MatchHistoryViewModel extends AndroidViewModel {
         return success[0];
     }
 
-    public long getRandomMatch(){
-        if(matchHistory == null)
-            setMatchHistory();
-        new WaitMatchHistory().execute();
-        return 0;
-    }
+//    public void getRandomMatch(){
+//        WaitMatchHistory asyncTask = new WaitMatchHistory();
+//        asyncTask.delegate = this;
+//        asyncTask.execute();
+//
+//        return processFinish();
+//    }
 
-    private class WaitMatchHistory extends AsyncTask<Void, Long, Long>{
+    static class WaitMatchHistory extends AsyncTask<Void, Long, Long>{
 
+        public AsyncResponse delegate = null;
+        MatchHistoryViewModel matchHistoryViewModel;
+
+        WaitMatchHistory(MatchHistoryViewModel matchHistoryViewModel){
+            this.matchHistoryViewModel = matchHistoryViewModel;
+        }
         @Override
         protected Long doInBackground(Void... voids) {
             Log.d(TAG, "getRandomMatch: START");
             try {
-                synchronized (lock) {
+                synchronized (matchHistoryViewModel.getLock()) {
                     Log.d(TAG, "getRandomMatch: synchronized");
-                    while (matchHistory == null) {
+                    while (matchHistoryViewModel.getMatchHistory() == null) {
                         Log.d(TAG, "getRandomMatch: waiting");
-                        lock.wait();
+                        matchHistoryViewModel.getLock().wait();
                     }
                     Log.d(TAG, "getRandomMatch: finished waiting");
                 }
             } catch (InterruptedException e) { e.printStackTrace(); }
             Log.d(TAG, "getRandomMatch: finished trying");
-            return matchHistory.getRandomMatch();
+            return matchHistoryViewModel.getMatchHistory().getRandomMatch();
+        }
+
+        @Override
+        protected void onPostExecute(Long aLong) {
+            delegate.processFinish(aLong);
         }
     }
 
