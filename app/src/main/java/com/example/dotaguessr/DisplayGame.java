@@ -324,7 +324,7 @@ public class DisplayGame extends FragmentActivity {
     public void revealAnswer(Player guessedPlayer, int nameColor){
         Intent intent = new Intent(this, AnswerActivity.class);
         intent.putExtra("guessedID", guessedPlayer.getAccountId());
-        intent.putExtra("correctID", playerID);
+        intent.putExtra("correctID", getIntent().getLongExtra("playerID", -1));
         intent.putExtra("heroIconUrl", guessedPlayer.getHero().getIconUrl());
         intent.putExtra("heroName", guessedPlayer.getHero().getName());
         intent.putExtra("nameColor", nameColor);

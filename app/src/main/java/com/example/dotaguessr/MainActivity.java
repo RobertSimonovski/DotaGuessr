@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity implements AsyncResponse{
     private SharedPreferences sharedPreferences;
     private long playerID;
     MatchHistoryViewModel matchHistoryViewModel;
+    MatchHistoryRepository matchHistoryRepository;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,26 +35,74 @@ public class MainActivity extends AppCompatActivity implements AsyncResponse{
         }
         sharedPreferences = getSharedPreferences(this.getLocalClassName(), Context.MODE_PRIVATE);
         playerID = sharedPreferences.getLong("playerID", -1);
+        matchHistoryRepository = MatchHistoryRepository.getInstance();
         setViews();
 
-        matchHistoryViewModel =
-                new ViewModelProvider(this, new MatchHistoryViewModelFactory(this.getApplication(), playerID))
-                        .get(MatchHistoryViewModel.class);
+//        matchHistoryViewModel =
+//                new ViewModelProvider(this, new MatchHistoryViewModelFactory(this.getApplication(), playerID))
+//                        .get(MatchHistoryViewModel.class);
     }
     public void play(View view){
-        if(playerID != -1){
+        if(matchHistoryViewModel == null || matchHistoryViewModel.getPlayerID() != playerID){
+            this.getViewModelStore().clear();
+            matchHistoryViewModel =
+                    new ViewModelProvider(this, new MatchHistoryViewModelFactory(this.getApplication(), playerID))
+                            .get(MatchHistoryViewModel.class);
+        }
+        if(playerID > 0){
+            Log.d(""+getLocalClassName(), "play: playerID = " + playerID);
             MatchHistoryViewModel.WaitMatchHistory waitMatchHistory = new MatchHistoryViewModel.WaitMatchHistory(matchHistoryViewModel);
             waitMatchHistory.delegate = this;
             waitMatchHistory.execute();
+        }
+        else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Please enter a valid Dota friend ID and make sure your matches are set to public");
+            builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.show();
         }
     }
 
     @Override
     public void processFinish(long output) {
-        Intent intent = new Intent(this, DisplayGame.class);
-        intent.putExtra("playerID", playerID);
-        intent.putExtra("matchID", output);
-        startActivity(intent);
+        if(output > 0) {
+            Intent intent = new Intent(this, DisplayGame.class);
+            intent.putExtra("playerID", playerID);
+            intent.putExtra("matchID", output);
+            matchHistoryRepository = MatchHistoryRepository.getInstance();
+            matchHistoryRepository.setMatchIDs(matchHistoryViewModel.getMatchHistory().getResultMatchHistory().getMatches(), playerID);
+            startActivity(intent);
+        }
+        else if(output == -1) {
+            //TODO
+        }
+        else if (output == -2) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Please check your internet connection");
+            builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.show();
+        }
+        else if (output == -3) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Please enter a valid Dota friend ID and make sure your matches are set to public");
+            builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.show();
+        }
     }
 
     public void enterID(View view){
@@ -112,11 +161,11 @@ public class MainActivity extends AppCompatActivity implements AsyncResponse{
         }
         else{
             //findViewById(R.id.friendIDTextView).setVisibility(View.VISIBLE);
+            textView.setText("Saved ID:");
             textView = findViewById(R.id.friendIDTV);
             textView.setVisibility(View.VISIBLE);
             textView.setText("" + playerID);
             button.setText("Change ID");
-            textView.setText("Saved ID:");
         }
     }
 }

@@ -25,11 +25,13 @@ public class MatchHistoryViewModel extends AndroidViewModel {
     private MatchHistory matchHistory;
     private static final String TAG = "MatchHistoryViewModel";
     private long playerID;
+    final byte[] success = {-1};
 
     public MatchHistoryViewModel(@NonNull Application application, long playerID) {
         super(application);
         this.playerID = playerID;
         setMatchHistory();
+        Log.d(TAG, "MatchHistoryViewModel: constructing");
 //        if (success == 1)
 //            throw new NetworkErrorException();
 //        else if (success == 2)
@@ -78,8 +80,9 @@ public class MatchHistoryViewModel extends AndroidViewModel {
         public int getNumResults() { return numResults; }
     }
 
-    private byte setMatchHistory(){
-        final byte[] success = {0};
+    private void setMatchHistory(){
+        Log.d(TAG, "setMatchHistory: setting");
+        success[0] = 0;
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
@@ -100,7 +103,7 @@ public class MatchHistoryViewModel extends AndroidViewModel {
             @Override
             public void onResponse(Call<MatchHistory> call, Response<MatchHistory> response) {
                 if(!response.isSuccessful()){
-                    success[0] = 1;
+                    success[0] = -2;
                     return;
                 }
                 Log.d(TAG, "onResponse: locking");
@@ -114,15 +117,13 @@ public class MatchHistoryViewModel extends AndroidViewModel {
                 if(     matchHistory.getResultMatchHistory().getStatus() != 1 ||
                         matchHistory.getResultMatchHistory().getNumResults() == 0)
                 {
-                    success[0] = 2;
+                    success[0] = -3;
                 }
             }
 
             @Override
-            public void onFailure(Call<MatchHistory> call, Throwable t) { success[0] = 1; }
+            public void onFailure(Call<MatchHistory> call, Throwable t) { success[0] = -2; }
         });
-
-        return success[0];
     }
 
 //    public void getRandomMatch(){
@@ -144,6 +145,7 @@ public class MatchHistoryViewModel extends AndroidViewModel {
         @Override
         protected Long doInBackground(Void... voids) {
             Log.d(TAG, "getRandomMatch: START");
+            Object lock = matchHistoryViewModel.getLock();
             try {
                 synchronized (matchHistoryViewModel.getLock()) {
                     Log.d(TAG, "getRandomMatch: synchronized");
@@ -155,7 +157,11 @@ public class MatchHistoryViewModel extends AndroidViewModel {
                 }
             } catch (InterruptedException e) { e.printStackTrace(); }
             Log.d(TAG, "getRandomMatch: finished trying");
-            return matchHistoryViewModel.getMatchHistory().getRandomMatch();
+
+            if(matchHistoryViewModel.getSuccess() == 0)
+                return matchHistoryViewModel.getMatchHistory().getRandomMatch();
+            else
+                return (long)matchHistoryViewModel.getSuccess();
         }
 
         @Override
@@ -164,6 +170,8 @@ public class MatchHistoryViewModel extends AndroidViewModel {
         }
     }
 
+    private byte getSuccess(){ return success[0]; }
     public MatchHistory getMatchHistory(){ return matchHistory; }
-    public Object getLock(){ return lock; }
+    private Object getLock(){ return lock; }
+    public long getPlayerID(){ return playerID; }
 }

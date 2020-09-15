@@ -96,10 +96,14 @@ public class Player {
     public int getNetWorth(){
         int net = 0;
 
-        for (Item i : getItems())
-            net += i.getCost();
-        for (Item i : getBackpack())
-            net += i.getCost();
+        for (Item i : getItems()){
+            if(i != null)
+                net += i.getCost();
+        }
+        for (Item i : getBackpack()) {
+            if(i != null)
+                net += i.getCost();
+        }
         return net;
     }
 

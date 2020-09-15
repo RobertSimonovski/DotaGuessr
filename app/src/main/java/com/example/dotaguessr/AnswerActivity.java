@@ -1,6 +1,7 @@
 package com.example.dotaguessr;
 
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -46,6 +47,9 @@ public class AnswerActivity extends AppCompatActivity {
         Intent intent = getIntent();
         TextView textView = findViewById(R.id.correctTextView);
         long guessedID = intent.getLongExtra("guessedID", -1), correctID = intent.getLongExtra("correctID", -2);
+
+        Log.d("ANSWER", "yesBtn: correctID = " + correctID + " guessedID = " + guessedID);
+
         if(guessedID == correctID)
             textView.setText("Correct!");
         else{
