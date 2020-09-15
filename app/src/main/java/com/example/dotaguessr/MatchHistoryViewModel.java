@@ -1,5 +1,6 @@
 package com.example.dotaguessr;
 
+import android.accounts.NetworkErrorException;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.os.AsyncTask;
@@ -14,6 +15,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
+import java.security.InvalidParameterException;
 import java.util.Random;
 
 public class MatchHistoryViewModel extends AndroidViewModel {
@@ -26,6 +29,11 @@ public class MatchHistoryViewModel extends AndroidViewModel {
     public MatchHistoryViewModel(@NonNull Application application, long playerID) {
         super(application);
         this.playerID = playerID;
+        setMatchHistory();
+//        if (success == 1)
+//            throw new NetworkErrorException();
+//        else if (success == 2)
+//            throw new InvalidParameterException();
     }
 
     static class MatchHistory{
@@ -39,10 +47,11 @@ public class MatchHistoryViewModel extends AndroidViewModel {
 
         public long getRandomMatch(){ return resultMatchHistory.getRandomMatch(); }
     }
-
     static class ResultMatchHistory {
         private Match[] matches;
         private int status;
+        @SerializedName("num_results")
+        private int numResults;
         private static final Random random = new Random();
 
         private static class Match {
@@ -65,10 +74,12 @@ public class MatchHistoryViewModel extends AndroidViewModel {
         public int getStatus() {
             return status;
         }
+
+        public int getNumResults() { return numResults; }
     }
 
-    public boolean setMatchHistory(){
-        final boolean[] success = {true};
+    private byte setMatchHistory(){
+        final byte[] success = {0};
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
@@ -89,7 +100,7 @@ public class MatchHistoryViewModel extends AndroidViewModel {
             @Override
             public void onResponse(Call<MatchHistory> call, Response<MatchHistory> response) {
                 if(!response.isSuccessful()){
-                    success[0] = false;
+                    success[0] = 1;
                     return;
                 }
                 Log.d(TAG, "onResponse: locking");
@@ -100,13 +111,15 @@ public class MatchHistoryViewModel extends AndroidViewModel {
                 }
                 Log.d(TAG, "onResponse: unlocking");
                 assert matchHistory != null;
-                if(matchHistory.getResultMatchHistory().getStatus() != 1){
-                    success[0] = false;
+                if(     matchHistory.getResultMatchHistory().getStatus() != 1 ||
+                        matchHistory.getResultMatchHistory().getNumResults() == 0)
+                {
+                    success[0] = 2;
                 }
             }
 
             @Override
-            public void onFailure(Call<MatchHistory> call, Throwable t) { success[0] = false; }
+            public void onFailure(Call<MatchHistory> call, Throwable t) { success[0] = 1; }
         });
 
         return success[0];

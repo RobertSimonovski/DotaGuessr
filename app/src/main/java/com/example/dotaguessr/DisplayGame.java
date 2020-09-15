@@ -100,11 +100,11 @@ public class DisplayGame extends FragmentActivity {
             }
         });
 
-        Intent intent = getIntent();
-        playerID = intent.getLongExtra("playerID", -1);
-
-        //matchHistory = ViewModelProviders.of(this, new ViewModelProvider.AndroidViewModelFactory(getApplication(), playerID));//.get(MatchHistoryViewModel.class);
-        //matchHistory.getRandomMatch();
+//        Intent intent = getIntent();
+//        playerID = intent.getLongExtra("playerID", -1);
+//
+//        matchHistory = ViewModelProviders.of(this, new ViewModelProvider.AndroidViewModelFactory(getApplication(), playerID));//.get(MatchHistoryViewModel.class);
+//        matchHistory.getRandomMatch();
 //        new AsyncTask<Void, Void, Long>() {
 //            @Override
 //            protected Long doInBackground(Void... voids) {

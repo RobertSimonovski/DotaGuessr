@@ -16,6 +16,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.ViewModelProvider;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -37,6 +38,10 @@ public class MainActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences(this.getLocalClassName(), Context.MODE_PRIVATE);
         playerID = sharedPreferences.getLong("playerID", -1);
         setViews();
+
+        MatchHistoryViewModel myViewModel =
+                new ViewModelProvider(this, new MatchHistoryViewModelFactory(this.getApplication(), playerID))
+                        .get(MatchHistoryViewModel.class);
     }
     public void play(View view){
         if(playerID != -1){
