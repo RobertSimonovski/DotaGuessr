@@ -305,5 +305,8 @@ public class DisplayGame extends FragmentActivity implements AsyncResponseGame{
     public void onBackPressed() {
         super.onBackPressed();
         PlayerRow.hideAnswers();
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 }

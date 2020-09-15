@@ -12,6 +12,7 @@ import com.squareup.picasso.Picasso;
 public class AnswerActivity extends AppCompatActivity {
 
     private boolean answered = false;
+    long guessedID, correctID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +47,8 @@ public class AnswerActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         TextView textView = findViewById(R.id.correctTextView);
-        long guessedID = intent.getLongExtra("guessedID", -1), correctID = intent.getLongExtra("correctID", -2);
+        guessedID = intent.getLongExtra("guessedID", -1);
+        correctID = intent.getLongExtra("correctID", -2);
 
         Log.d("ANSWER", "yesBtn: correctID = " + correctID + " guessedID = " + guessedID);
 
@@ -77,6 +79,11 @@ public class AnswerActivity extends AppCompatActivity {
 
     public void nextBtn(View view){
         PlayerRow.hideAnswers();
-        onBackPressed();
+        Intent intent = new Intent(this, DisplayGame.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("playerID", correctID);
+        //intent.putExtra("matchID", MatchHistoryRepository.getInstance().getRandomID());
+        startActivity(intent);
+        finish();
     }
 }
